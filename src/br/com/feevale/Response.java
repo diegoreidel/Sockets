@@ -46,10 +46,6 @@ public class Response {
         return contentType;
     }
 
-    private ContentType getContentTypeForUri(String uri) {
-        return  null;
-    }
-
     public byte[] getResponse() throws IOException{
         String response = SUCCESS_HEADER + System.getProperty("line.separator") +
                 CONTENT_TYPE + getContentType() + System.getProperty("line.separator") +

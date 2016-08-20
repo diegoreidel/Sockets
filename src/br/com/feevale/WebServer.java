@@ -5,10 +5,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class WebServer {
     private String RUNTIME_EXCEPTION_MESSAGE = "Socket Error!";
+    private String RESOURCE_NOT_FOUND = "Could not find file ";
     private String HOMEPAGE = "home.html";
+    private String ERROR_PAGE = "error.html";
     private ServerSocket ss;
 
     public void setUp() {
@@ -20,7 +23,7 @@ public class WebServer {
         }
     }
 
-    public Socket waitForConnections() throws IOException { return ss.accept(); }
+    public Socket waitForConnection() throws IOException { return ss.accept(); }
 
     public Request receiveRequest(Socket s) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -53,23 +56,29 @@ public class WebServer {
     }
 
     private ContentType getContentTypeForURI(String uri){
-        String extension = uri.split("\\.")[1];
 
-        switch (extension) {
-            case "JPEG": case "JPG": case "jpeg": case "jpg":
+        String extension = uri.contains(".") ? uri.split("\\.")[1] : "";
+
+        switch (extension.toUpperCase()) {
+            case "JPEG": case "JPG":
                 return ContentType.JPEG;
             default:
                 return ContentType.HTML;
         }
     }
 
-    private byte[] getResource(String fileName) throws IOException{
+    private byte[] getResource(String fileName){
         ClassLoader classLoader = getClass().getClassLoader();
 
-        File file = new File(classLoader.getResource(fileName).getFile());
-        Path path = file.toPath();
+        try {
+            File file = Optional<File> (classLoader.getResource(fileName).getFile());
+            Path path = file.toPath();
 
-        return Files.readAllBytes(path);
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            System.out.println(RESOURCE_NOT_FOUND + fileName);
+        }
+        return getResource(ERROR_PAGE);
     }
 
     public void registerResponse(String response) {
@@ -85,7 +94,7 @@ public class WebServer {
         ws.setUp();
         while(true) {
             try {
-                Socket socket = ws.waitForConnections();
+                Socket socket = ws.waitForConnection();
                 Request request = ws.receiveRequest(socket);
                 ws.sendResponse(request, socket);
                 socket.close();
