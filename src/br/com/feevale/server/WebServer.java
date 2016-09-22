@@ -1,11 +1,10 @@
-package br.com.feevale;
+package br.com.feevale.server;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 public class WebServer {
     private String RUNTIME_EXCEPTION_MESSAGE = "Socket Error!";
@@ -71,8 +70,8 @@ public class WebServer {
         ClassLoader classLoader = getClass().getClassLoader();
 
         try {
-            File file = Optional<File> (classLoader.getResource(fileName).getFile());
-            Path path = file.toPath();
+            String file = classLoader.getResource(fileName).getFile();
+            Path path = null;
 
             return Files.readAllBytes(path);
         } catch (IOException e) {
@@ -85,23 +84,4 @@ public class WebServer {
         System.out.println(response);
     }
 
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        WebServer ws = new WebServer();
-        ws.setUp();
-        while(true) {
-            try {
-                Socket socket = ws.waitForConnection();
-                Request request = ws.receiveRequest(socket);
-                ws.sendResponse(request, socket);
-                socket.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

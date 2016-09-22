@@ -1,4 +1,4 @@
-package br.com.feevale;
+package br.com.feevale.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

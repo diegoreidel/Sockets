@@ -1,4 +1,4 @@
-package br.com.feevale;
+package br.com.feevale.server;
 
 public class Request {
 
